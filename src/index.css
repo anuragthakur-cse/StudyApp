@@ -1,0 +1,159 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --sidebar-bg: #1e2a4a;
+    --sidebar-text: #a8b4d8;
+    --sidebar-active: #3b82f6;
+    --sidebar-hover: #2d3f6e;
+    --accent: #3b82f6;
+    --accent-hover: #2563eb;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    @apply bg-gray-50 text-gray-900 antialiased;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  .dark body {
+    @apply bg-gray-950 text-gray-100;
+  }
+}
+
+@layer components {
+  .sidebar {
+    background-color: var(--sidebar-bg);
+  }
+
+  .sidebar-link {
+    @apply flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-150;
+    color: var(--sidebar-text);
+  }
+
+  .sidebar-link:hover {
+    background-color: var(--sidebar-hover);
+    color: #e2e8f0;
+  }
+
+  .sidebar-link.active {
+    background-color: var(--sidebar-active);
+    color: #ffffff;
+  }
+
+  .card {
+    @apply bg-white rounded-xl border border-gray-200 shadow-sm;
+  }
+
+  .dark .card {
+    @apply bg-gray-900 border-gray-800;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .dark .btn-secondary {
+    @apply bg-gray-800 text-gray-200 hover:bg-gray-700;
+  }
+
+  .btn-danger {
+    @apply inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center gap-2 px-3 py-1.5 text-gray-600 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors;
+  }
+
+  .dark .btn-ghost {
+    @apply text-gray-400 hover:bg-gray-800;
+  }
+
+  .input {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors;
+  }
+
+  .dark .input {
+    @apply bg-gray-800 border-gray-700 text-gray-100 placeholder-gray-500;
+  }
+
+  .badge {
+    @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .badge-high {
+    @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700;
+  }
+  .badge-medium {
+    @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700;
+  }
+  .badge-low {
+    @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700;
+  }
+
+  .progress-bar {
+    @apply h-2 rounded-full bg-gray-200 overflow-hidden;
+  }
+
+  .progress-fill {
+    @apply h-full rounded-full bg-blue-500 transition-all duration-500;
+  }
+
+  /* TipTap editor styles */
+  .tiptap-editor {
+    @apply min-h-48 p-4 focus:outline-none;
+  }
+
+  .tiptap-editor h1 { @apply text-2xl font-bold my-3; }
+  .tiptap-editor h2 { @apply text-xl font-bold my-2; }
+  .tiptap-editor h3 { @apply text-lg font-semibold my-2; }
+  .tiptap-editor p { @apply my-1.5 leading-relaxed; }
+  .tiptap-editor ul { @apply list-disc pl-6 my-2; }
+  .tiptap-editor ol { @apply list-decimal pl-6 my-2; }
+  .tiptap-editor li { @apply my-0.5; }
+  .tiptap-editor strong { @apply font-bold; }
+  .tiptap-editor em { @apply italic; }
+  .tiptap-editor code { @apply bg-gray-100 text-red-600 px-1 py-0.5 rounded text-sm font-mono; }
+  .tiptap-editor pre { @apply bg-gray-900 text-gray-100 rounded-lg p-4 my-3 overflow-x-auto; }
+  .tiptap-editor pre code { @apply bg-transparent text-gray-100 p-0; }
+  .tiptap-editor blockquote { @apply border-l-4 border-blue-500 pl-4 my-3 text-gray-600 italic; }
+  .tiptap-editor table { @apply border-collapse w-full my-3; }
+  .tiptap-editor td, .tiptap-editor th { @apply border border-gray-300 px-3 py-2 text-sm; }
+  .tiptap-editor th { @apply bg-gray-100 font-semibold; }
+  .tiptap-editor p.is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    @apply text-gray-400 pointer-events-none float-left h-0;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { @apply bg-transparent; }
+  ::-webkit-scrollbar-thumb { @apply bg-gray-300 rounded-full; }
+  ::-webkit-scrollbar-thumb:hover { @apply bg-gray-400; }
+  .dark ::-webkit-scrollbar-thumb { @apply bg-gray-700; }
+
+  /* Animations */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .fade-in {
+    animation: fadeIn 0.2s ease-out;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .spinner {
+    animation: spin 1s linear infinite;
+  }
+}
