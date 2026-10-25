@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: studyvault-ai-api
+    runtime: node
+    plan: free
+    buildCommand: npm ci
+    startCommand: npm run server
+    healthCheckPath: /api/health
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: NODE_VERSION
+        value: "20"

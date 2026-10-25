@@ -1,11 +1,11 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Plus, Pencil, Trash2, ChevronDown, ChevronRight,
-  BookOpen, HelpCircle, CheckCircle, Star, GraduationCap,
+  GraduationCap, HelpCircle,
   X, Save, AlertTriangle
 } from 'lucide-react';
-import { db, Semester, Subject, Unit } from '../db/database';
+import { db, Semester, Subject } from '../db/database';
 import { useApp } from '../contexts/AppContext';
 
 // ── Modal component ──────────────────────────────────────────────
@@ -325,7 +325,9 @@ export default function SemestersPage() {
       for (const sub of subs) {
         await db.units.where('subjectId').equals(sub.id!).delete();
         await db.questions.where('subjectId').equals(sub.id!).delete();
+        await db.notes.where('subjectId').equals(sub.id!).delete();
       }
+      await db.notes.where('semesterId').equals(deleteTarget.id).delete();
       await db.subjects.where('semesterId').equals(deleteTarget.id).delete();
       await db.semesters.delete(deleteTarget.id);
       const allSems = await db.semesters.orderBy('number').toArray();
@@ -333,6 +335,7 @@ export default function SemestersPage() {
     } else {
       await db.units.where('subjectId').equals(deleteTarget.id).delete();
       await db.questions.where('subjectId').equals(deleteTarget.id).delete();
+      await db.notes.where('subjectId').equals(deleteTarget.id).delete();
       await db.subjects.delete(deleteTarget.id);
     }
     triggerRefresh();

@@ -1,14 +1,12 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
-  Plus, Search, Filter, Pencil, Trash2, Star, CheckCircle,
-  ChevronDown, X, Save, AlertTriangle, Eye, EyeOff, Bot,
-  Clock, Flag, BookOpen, HelpCircle, RefreshCw, Download,
-  SlidersHorizontal, ArrowUpDown
+  Plus, Search, Pencil, Trash2, Star, CheckCircle,
+  X, Save, AlertTriangle, Eye, EyeOff, Bot,
+  HelpCircle, SlidersHorizontal
 } from 'lucide-react';
-import { db, Question, Subject, Unit, Semester, Priority, PrepStatus, QuestionType } from '../db/database';
+import { db, Question, Subject, Unit, Priority, PrepStatus, QuestionType } from '../db/database';
 import { useApp } from '../contexts/AppContext';
-import { format } from 'date-fns';
 
 // ── Constants ────────────────────────────────────────────────────
 const MARKS_OPTIONS = [2, 3, 5, 7, 10];

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, Plus, HelpCircle, ChevronRight, Pencil, Trash2, AlertTriangle, X, Save } from 'lucide-react';
+import { BookOpen, Plus, HelpCircle, ChevronRight, Pencil, X, Save } from 'lucide-react';
 import { db, Subject, Unit } from '../db/database';
 import { useApp } from '../contexts/AppContext';
 
@@ -27,7 +27,6 @@ export default function SubjectsPage() {
   const [loading, setLoading] = useState(true);
   const [editUnit, setEditUnit] = useState<Unit | null>(null);
   const [showUnitForm, setShowUnitForm] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState<{ type: 'unit'; id: number; name: string } | null>(null);
 
   useEffect(() => { loadData(); }, [activeSemesterId, refreshTrigger]);
 

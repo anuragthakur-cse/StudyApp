@@ -11,7 +11,6 @@ import {
   ChevronLeft,
   ChevronRight,
   GraduationCap,
-  Menu,
   X,
 } from 'lucide-react';
 import { useApp } from '../../contexts/AppContext';

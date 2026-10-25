@@ -1,10 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
-  Plus, FileText, Save, Trash2, Search, X, Tag,
+  Plus, FileText, Save, Trash2, Search, X,
   AlertTriangle, BookOpen, Clock, Bold, Italic,
-  List, ListOrdered, Code, Heading1, Heading2, Table2,
-  Undo, Redo, AlignLeft, Link
+  List, ListOrdered, Code, Heading1, Heading2,
+  Undo, Redo, AlignLeft
 } from 'lucide-react';
 import { db, Note, Subject } from '../db/database';
 import { useApp } from '../contexts/AppContext';

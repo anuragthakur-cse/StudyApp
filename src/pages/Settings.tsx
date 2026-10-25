@@ -3,12 +3,12 @@ import { Settings, Sun, Moon, Database, Download, Upload, Trash2, AlertTriangle 
 import { db, seedSampleData } from '../db/database';
 import { useApp } from '../contexts/AppContext';
 
+const API_BASE_URL = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
+
 export default function SettingsPage() {
-  const { theme, toggleTheme, semesters, activeSemesterId, setActiveSemesterId, triggerRefresh } = useApp();
+  const { theme, toggleTheme, activeSemesterId, triggerRefresh } = useApp();
   const [stats, setStats] = useState({ questions: 0, notes: 0, subjects: 0 });
   const [showClearConfirm, setShowClearConfirm] = useState(false);
-  const [aiKey, setAiKey] = useState('');
-  const [saved, setSaved] = useState(false);
   const [importStatus, setImportStatus] = useState('');
 
   useEffect(() => {
@@ -46,7 +46,16 @@ export default function SettingsPage() {
       setImportStatus('Reading file...');
       const text = await file.text();
       const data = JSON.parse(text);
-      if (!data.version || !data.semesters) throw new Error('Invalid backup file format');
+      if (
+        data.version !== 1
+        || !Array.isArray(data.semesters)
+        || !Array.isArray(data.subjects)
+        || !Array.isArray(data.units)
+        || !Array.isArray(data.questions)
+        || !Array.isArray(data.notes)
+      ) {
+        throw new Error('Invalid backup file format');
+      }
 
       if (!confirm(`Import backup from ${data.exportedAt}? This will ADD data to existing records (won't delete current data).`)) {
         setImportStatus('');
@@ -54,12 +63,85 @@ export default function SettingsPage() {
       }
 
       setImportStatus('Importing...');
-      // Import in order (semesters → subjects → units → questions → notes)
-      // We use add() which will get new IDs to avoid conflicts
-      for (const sem of data.semesters) {
-        const { id, ...rest } = sem;
-        await db.semesters.add({ ...rest, createdAt: new Date(rest.createdAt), updatedAt: new Date(rest.updatedAt) });
-      }
+      await db.transaction('rw', db.semesters, db.subjects, db.units, db.questions, db.notes, async () => {
+        const semesterIds = new Map<number, number>();
+        const subjectIds = new Map<number, number>();
+        const unitIds = new Map<number, number>();
+        const questionIds = new Map<number, number>();
+
+        for (const sem of data.semesters) {
+          const { id, ...rest } = sem;
+          const newId = await db.semesters.add({
+            ...rest,
+            createdAt: new Date(rest.createdAt),
+            updatedAt: new Date(rest.updatedAt),
+          });
+          if (typeof id === 'number') semesterIds.set(id, newId as number);
+        }
+
+        for (const subject of data.subjects) {
+          const { id, semesterId, ...rest } = subject;
+          const newSemesterId = semesterIds.get(semesterId);
+          if (!newSemesterId) continue;
+          const newId = await db.subjects.add({
+            ...rest,
+            semesterId: newSemesterId,
+            createdAt: new Date(rest.createdAt),
+            updatedAt: new Date(rest.updatedAt),
+          });
+          if (typeof id === 'number') subjectIds.set(id, newId as number);
+        }
+
+        for (const unit of data.units) {
+          const { id, subjectId, semesterId, ...rest } = unit;
+          const newSubjectId = subjectIds.get(subjectId);
+          const newSemesterId = semesterIds.get(semesterId);
+          if (!newSubjectId || !newSemesterId) continue;
+          const newId = await db.units.add({
+            ...rest,
+            subjectId: newSubjectId,
+            semesterId: newSemesterId,
+            createdAt: new Date(rest.createdAt),
+            updatedAt: new Date(rest.updatedAt),
+          });
+          if (typeof id === 'number') unitIds.set(id, newId as number);
+        }
+
+        for (const question of data.questions) {
+          const { id, semesterId, subjectId, unitId, ...rest } = question;
+          const newSemesterId = semesterIds.get(semesterId);
+          const newSubjectId = subjectIds.get(subjectId);
+          const newUnitId = unitIds.get(unitId);
+          if (!newSemesterId || !newSubjectId || !newUnitId) continue;
+          const newId = await db.questions.add({
+            ...rest,
+            semesterId: newSemesterId,
+            subjectId: newSubjectId,
+            unitId: newUnitId,
+            createdAt: new Date(rest.createdAt),
+            updatedAt: new Date(rest.updatedAt),
+            ...(rest.lastRevisedAt ? { lastRevisedAt: new Date(rest.lastRevisedAt) } : {}),
+          });
+          if (typeof id === 'number') questionIds.set(id, newId as number);
+        }
+
+        for (const note of data.notes) {
+          const { id: _noteId, semesterId, subjectId, unitId, questionId, ...rest } = note;
+          const newSemesterId = semesterId ? semesterIds.get(semesterId) : undefined;
+          const newSubjectId = subjectId ? subjectIds.get(subjectId) : undefined;
+          const newUnitId = unitId ? unitIds.get(unitId) : undefined;
+          const newQuestionId = questionId ? questionIds.get(questionId) : undefined;
+          await db.notes.add({
+            ...rest,
+            ...(newSemesterId ? { semesterId: newSemesterId } : {}),
+            ...(newSubjectId ? { subjectId: newSubjectId } : {}),
+            ...(newUnitId ? { unitId: newUnitId } : {}),
+            ...(newQuestionId ? { questionId: newQuestionId } : {}),
+            createdAt: new Date(rest.createdAt),
+            updatedAt: new Date(rest.updatedAt),
+          });
+        }
+      });
       setImportStatus('✓ Import complete!');
       triggerRefresh();
       setTimeout(() => setImportStatus(''), 3000);
@@ -230,8 +312,8 @@ export default function SettingsPage() {
           </p>
         </div>
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          The AI assistant connects to <code>http://localhost:3001/api/ai/answer</code>. 
-          Start the backend server with <code>npm run server</code> and add your Gemini API key to <code>server/.env</code>.
+          The AI assistant connects to <code>{API_BASE_URL ? `${API_BASE_URL}/api/ai/answer` : '/api/ai/answer'}</code>.
+          Configure <code>VITE_API_URL</code> for a separately deployed backend, or use the local Vite proxy during development.
         </p>
         <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
           <p className="text-xs text-blue-700 dark:text-blue-300">

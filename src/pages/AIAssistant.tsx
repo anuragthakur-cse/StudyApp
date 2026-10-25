@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import {
   Send, Bot, RefreshCw, X, BookOpen, HelpCircle,
   Sparkles, Zap, Copy, CheckCheck, ChevronDown,
@@ -20,6 +20,8 @@ interface AIGenerateOptions {
   marks: 2 | 3 | 5 | 7 | 10;
   action: 'generate' | 'improve' | 'simplify' | 'expand' | 'shorten' | 'bullet' | 'diagram' | 'example' | 'accuracy' | 'seven_mark' | 'translate';
 }
+
+const API_BASE_URL = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
 
 const LANGUAGE_OPTIONS = [
   { value: 'hindi_english', label: 'Hindi + English Terms' },
@@ -120,7 +122,7 @@ Important: Do NOT fabricate references, exam frequency, or textbook citations.`;
 // Call the backend AI API (or mock)
 async function callAI(prompt: string, previousId?: string): Promise<{ text: string; interactionId?: string }> {
   try {
-    const res = await fetch('/api/ai/answer', {
+    const res = await fetch(`${API_BASE_URL}/api/ai/answer`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ prompt, previousInteractionId: previousId }),
@@ -154,8 +156,8 @@ export default function AIAssistantPage() {
   const [question, setQuestion] = useState<Question | null>(null);
   const [subject, setSubject] = useState<Subject | null>(null);
   const [unit, setUnit] = useState<Unit | null>(null);
-  const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [units, setUnits] = useState<Unit[]>([]);
+  const [, setSubjects] = useState<Subject[]>([]);
+  const [, setUnits] = useState<Unit[]>([]);
   const [questions, setQuestions] = useState<Question[]>([]);
 
   const [messages, setMessages] = useState<Message[]>([]);

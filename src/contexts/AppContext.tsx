@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { db, seedSampleData, Semester, Subject, Unit } from '../db/database';
+import { db, seedSampleData, Semester, Subject } from '../db/database';
 
 interface AppContextType {
   // Theme

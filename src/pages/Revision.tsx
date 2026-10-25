@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Star, CheckCircle, Eye, EyeOff, ChevronRight,
-  BookOpen, Bot, Flag, RotateCcw, Shuffle, X
+  Star, CheckCircle, Eye, ChevronRight,
+  Bot, RotateCcw, Shuffle
 } from 'lucide-react';
 import { db, Question, Subject } from '../db/database';
 import { useApp } from '../contexts/AppContext';

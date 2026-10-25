@@ -145,6 +145,43 @@ npm run dev
 
 Visit **http://localhost:5173** in your browser to start studying!
 
+## ☁️ Production Deployment
+
+The frontend and AI backend are deployed separately:
+
+### 1. Deploy the backend
+
+This repository includes a `render.yaml` blueprint for Render. Create a new Render Blueprint from the repository, then set:
+
+```env
+GEMINI_API_KEY=your_actual_gemini_api_key
+FRONTEND_URL=https://your-app.vercel.app
+```
+
+After deployment, verify:
+
+```text
+https://your-backend.onrender.com/api/health
+```
+
+### 2. Deploy the frontend to Vercel
+
+Import the repository into Vercel with these settings:
+
+- **Framework Preset:** Vite
+- **Build Command:** `npm run build`
+- **Output Directory:** `dist`
+
+Add this Vercel environment variable:
+
+```env
+VITE_API_URL=https://your-backend.onrender.com
+```
+
+Redeploy after adding the variable. The AI assistant will then call the deployed backend instead of the local Vite proxy.
+
+> Never add `GEMINI_API_KEY` to Vercel or any `VITE_*` variable. Vite variables are visible in the browser. Keep the Gemini key only in the backend environment.
+
 ---
 
 ## 🏗️ Production Build

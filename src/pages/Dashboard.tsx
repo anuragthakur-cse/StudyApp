@@ -5,7 +5,7 @@ import {
   Star, TrendingUp, Plus, ArrowRight, BookMarked, Bot,
   BarChart2, Zap
 } from 'lucide-react';
-import { db, Question, Subject, Semester, Unit } from '../db/database';
+import { db, Question, Subject, Semester } from '../db/database';
 import { useApp } from '../contexts/AppContext';
 import { format } from 'date-fns';
 
@@ -45,7 +45,7 @@ function StatCard({ icon: Icon, label, value, color, onClick }: {
 }
 
 export default function Dashboard() {
-  const { activeSemesterId, semesters, activeSubjects, refreshTrigger } = useApp();
+  const { activeSemesterId, semesters, refreshTrigger } = useApp();
   const navigate = useNavigate();
   const [stats, setStats] = useState<Stats>({
     totalSubjects: 0,
