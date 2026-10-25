@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
   Plus, FileText, Save, Trash2, Search, X,
   AlertTriangle, BookOpen, Clock, Bold, Italic,
   List, ListOrdered, Code, Heading1, Heading2,
-  Undo, Redo, AlignLeft
+  Undo, Redo, AlignLeft, Image as ImageIcon
 } from 'lucide-react';
 import { db, Note, Subject } from '../db/database';
 import { useApp } from '../contexts/AppContext';
@@ -16,20 +16,55 @@ import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import Placeholder from '@tiptap/extension-placeholder';
 import TextAlign from '@tiptap/extension-text-align';
+import Image from '@tiptap/extension-image';
 
 function RichEditor({ content, onChange, placeholder }: { content: string; onChange: (html: string) => void; placeholder?: string }) {
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const [imageError, setImageError] = useState('');
+  const maxImageSize = 5 * 1024 * 1024;
+
   const editor = useEditor({
     extensions: [
       StarterKit,
       Underline,
       Placeholder.configure({ placeholder: placeholder || 'Start writing your note...' }),
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
+      Image.configure({ inline: false, allowBase64: true }),
     ],
     content,
     onUpdate: ({ editor }) => onChange(editor.getHTML()),
   });
 
   if (!editor) return null;
+
+  const insertImage = (file: File) => {
+    setImageError('');
+    if (!file.type.startsWith('image/')) {
+      setImageError('Please select an image file.');
+      return;
+    }
+    if (file.size > maxImageSize) {
+      setImageError('Image size must be 5 MB or less.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result !== 'string') {
+        setImageError('Could not read this image.');
+        return;
+      }
+      editor.chain().focus().setImage({ src: reader.result, alt: file.name }).run();
+    };
+    reader.onerror = () => setImageError('Could not read this image.');
+    reader.readAsDataURL(file);
+  };
+
+  const handleImageSelection = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) insertImage(file);
+    event.target.value = '';
+  };
 
   const btn = (action: () => void, isActive: boolean, icon: React.ReactNode, title: string) => (
     <button
@@ -59,11 +94,37 @@ function RichEditor({ content, onChange, placeholder }: { content: string; onCha
         {btn(() => editor.chain().focus().toggleCode().run(), editor.isActive('code'), <Code size={14} />, 'Inline Code')}
         {btn(() => editor.chain().focus().toggleCodeBlock().run(), editor.isActive('codeBlock'), <Code size={16} />, 'Code Block')}
         {btn(() => editor.chain().focus().toggleBlockquote().run(), editor.isActive('blockquote'), <AlignLeft size={14} />, 'Quote')}
+        {btn(() => imageInputRef.current?.click(), false, <ImageIcon size={14} />, 'Add image')}
         <div className="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-1" />
         {btn(() => editor.chain().focus().undo().run(), false, <Undo size={14} />, 'Undo')}
         {btn(() => editor.chain().focus().redo().run(), false, <Redo size={14} />, 'Redo')}
       </div>
-      <EditorContent editor={editor} className="tiptap-editor min-h-64 prose prose-sm dark:prose-invert max-w-none" />
+      <input
+        ref={imageInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleImageSelection}
+      />
+      <EditorContent
+        editor={editor}
+        className="tiptap-editor min-h-64 prose prose-sm dark:prose-invert max-w-none"
+        onDrop={event => {
+          const file = event.dataTransfer.files[0];
+          if (file?.type.startsWith('image/')) {
+            event.preventDefault();
+            insertImage(file);
+          }
+        }}
+        onPaste={event => {
+          const file = Array.from(event.clipboardData.files).find(item => item.type.startsWith('image/'));
+          if (file) {
+            event.preventDefault();
+            insertImage(file);
+          }
+        }}
+      />
+      {imageError && <p className="px-3 py-2 text-xs text-red-600 dark:text-red-400">{imageError}</p>}
     </div>
   );
 }

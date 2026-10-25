@@ -124,6 +124,7 @@
   .tiptap-editor pre { @apply bg-gray-900 text-gray-100 rounded-lg p-4 my-3 overflow-x-auto; }
   .tiptap-editor pre code { @apply bg-transparent text-gray-100 p-0; }
   .tiptap-editor blockquote { @apply border-l-4 border-blue-500 pl-4 my-3 text-gray-600 italic; }
+  .tiptap-editor img { @apply max-w-full h-auto rounded-lg my-3; }
   .tiptap-editor table { @apply border-collapse w-full my-3; }
   .tiptap-editor td, .tiptap-editor th { @apply border border-gray-300 px-3 py-2 text-sm; }
   .tiptap-editor th { @apply bg-gray-100 font-semibold; }
